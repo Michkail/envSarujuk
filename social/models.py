@@ -49,11 +49,14 @@ class Province(models.TextChoices):
 
 
 class Address(models.Model):
+    user = models.ForeignKey('account.User', on_delete=models.CASCADE, blank=True, null=True)
     address_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    province = models.CharField(max_length=100, choices=Province.choices, default=Province.JAKARTA)
+    province = models.CharField(max_length=100, choices=Province.choices, default=Province.JAKARTA, blank=True,
+                                null=True)
     postal_code = models.CharField(max_length=5,
-                                   validators=[RegexValidator('^[0-9]{5}$', _('Invalid postal code'))])
-    address = models.TextField()
+                                   validators=[RegexValidator('^[0-9]{5}$', _('Invalid postal code'))],
+                                   blank=True, null=True)
+    address = models.TextField(null=True, blank=True)
 
 
 class SocialMedia(models.Model):
@@ -63,8 +66,8 @@ class SocialMedia(models.Model):
 
 class Platform(models.Model):
     platform_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    account_id = models.ForeignKey('Account', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
 
 
 class Account(models.Model):
@@ -72,18 +75,18 @@ class Account(models.Model):
     username = models.CharField(max_length=255)
     email = models.EmailField()
     password = models.CharField(max_length=255)
-    photo_profile = models.ImageField(upload_to='photos/')
+    photo_profile = models.ImageField(upload_to='photos/', blank=True, null=True)
 
 
 class AccountContent(models.Model):
     account_content_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     description = models.TextField()
-    media_id = models.ManyToManyField('Media')
+    media_id = models.ManyToManyField('Media', blank=True)
     media_count = models.IntegerField()
-    comment_parent_id = models.ManyToManyField('CommentParent')
+    comment_parent_id = models.ManyToManyField('CommentParent', blank=True)
     comment_count = models.IntegerField()
-    address_id = models.ForeignKey('Address', on_delete=models.CASCADE)
-    account_id = models.ForeignKey('Account', on_delete=models.CASCADE)
+    address_id = models.ForeignKey('Address', on_delete=models.CASCADE, blank=True, null=True)
+    account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
 
 
 class CommentParent(models.Model):
