@@ -14,6 +14,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from .views import *
@@ -29,7 +32,7 @@ urlpatterns = [
     path("mock/feature/button/", mock_feature_button, name="mock-feature-button"),
     path("mock/feature/dropdown/", mock_feature_dropdown, name="mock-feature-dropdown"),
     path("mock/feature/typography/", mock_feature_typography, name="mock-feature-typography")
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler400 = "core.views.bad_req"  # BAD REQUEST
 handler403 = "core.views.permission_denied"  # PERMISSION DENIED
