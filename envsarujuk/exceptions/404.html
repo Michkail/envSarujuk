@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom 429 Error Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .error-container {
+            text-align: center;
+        }
+
+        .error-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <img class="error-image" src="{% static 'images/logo-sarujuk-mini.png' %}" alt="Error Image">
+        <p class="error-message">Sorry, you have made too many requests. Please try again later.</p>
+    </div>
+</body>
+</html>

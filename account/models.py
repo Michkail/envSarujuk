@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
 
 from social.models import SocialMedia, Address
 
@@ -32,7 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
-    name = models.CharField(max_length=255, null=True, blank=True)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    last_name = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     social_media_id = models.ForeignKey(SocialMedia, on_delete=models.CASCADE, null=True, blank=True)
     address_id = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True,
@@ -41,6 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    date_updated = models.DateTimeField(auto_now_add=True)
+    date_joined = models.DateField(auto_now=True)
 
     objects = UserManager()
 

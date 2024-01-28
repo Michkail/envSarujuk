@@ -1,4 +1,3 @@
-import os
 import uuid
 
 from django.core.validators import RegexValidator
@@ -57,17 +56,26 @@ class Address(models.Model):
                                    validators=[RegexValidator('^[0-9]{5}$', _('Invalid postal code'))],
                                    blank=True, null=True)
     address = models.TextField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 
 class SocialMedia(models.Model):
     social_media_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     platform_id = models.ForeignKey('Platform', on_delete=models.CASCADE)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 
 class Platform(models.Model):
     platform_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Account(models.Model):
@@ -75,7 +83,12 @@ class Account(models.Model):
     username = models.CharField(max_length=255)
     email = models.EmailField()
     password = models.CharField(max_length=255)
+    follower = models.PositiveIntegerField(null=True, blank=True)
+    following = models.PositiveIntegerField(null=True, blank=True)
+    posts_count = models.PositiveIntegerField(null=True, blank=True)
     photo_profile = models.ImageField(upload_to='photos/', blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 
 class AccountContent(models.Model):
@@ -87,17 +100,23 @@ class AccountContent(models.Model):
     comment_count = models.IntegerField()
     address_id = models.ForeignKey('Address', on_delete=models.CASCADE, blank=True, null=True)
     account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 
 class CommentParent(models.Model):
     comment_parent_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment_detail = models.TextField()
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 
 class Comment(models.Model):
     comment_parent_id = models.ForeignKey('CommentParent', on_delete=models.CASCADE, null=True)
     comment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment_detail = models.TextField()
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
 
 #
 # def media_upload_path(instance, filename):
@@ -112,3 +131,5 @@ class Media(models.Model):
     # platform = models.ForeignKey('Platform', on_delete=models.CASCADE, related_name='media', null=True, blank=True)
     # media_location = models.FileField(upload_to=media_upload_path)
     media_location = models.FileField(upload_to='media/social/')
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True)
