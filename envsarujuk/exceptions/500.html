@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" />
+    <title>500 Internal Server Error | Sarujuk Apps</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .error-container {
+            text-align: center;
+        }
+
+        .error-image {
+            max-width: 100%;
+            width: 80vh;
+            height: auto;
+        }
+
+        .error-message {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <img class="error-image" src="{% static 'images/error/500.svg' %}" alt="Error Image">
+        <p class="error-message">The server encountered an unexpected condition, please try again later.</p>
+    </div>
+</body>
+</html>

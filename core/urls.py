@@ -21,6 +21,14 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import *
 
+handler400 = "core.views.bad_req"  # BAD REQUEST
+handler403 = "core.views.permission_denied"  # PERMISSION DENIED
+handler404 = "core.views.page_not_found"  # PAGE NOT FOUND
+handler429 = "core.views.too_m_req"  # TOO MANY REQUEST
+handler500 = "core.views.server_err"  # SERVER ERROR
+handler503 = "core.views.serv_un"  # SERVICE UNAVAILABLE
+handler504 = "core.views.g_timeout"  # GATEWAY TIMEOUT
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", index, name="index"),
@@ -33,8 +41,3 @@ urlpatterns = [
     path("mock/feature/dropdown/", mock_feature_dropdown, name="mock-feature-dropdown"),
     path("mock/feature/typography/", mock_feature_typography, name="mock-feature-typography")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-handler400 = "core.views.bad_req"  # BAD REQUEST
-handler403 = "core.views.permission_denied"  # PERMISSION DENIED
-handler404 = "core.views.page_not_found"  # PAGE NOT FOUND
-handler500 = "core.views.server_err"  # SERVER ERROR

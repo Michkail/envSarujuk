@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, BadRequest
+from django.http import Http404
 from django.shortcuts import render
-from django.template import RequestContext
 
 
 @login_required
@@ -57,8 +58,41 @@ def page_not_found(request, exception):
     return response
 
 
+def too_m_req(request, exception):
+    response = render(request, 'exceptions/429.html', {})
+    response.status_code = 429
+
+    return response
+
+
 def server_err(request):
     response = render(request, 'exceptions/500.html', {})
     response.status_code = 500
 
     return response
+
+
+def serv_un(request, exception):
+    response = render(request, 'exceptions/503.html', {})
+    response.status_code = 503
+
+    return response
+
+
+def g_timeout(request, exception):
+    response = render(request, 'exceptions/504.html', {})
+    response.status_code = 504
+
+    return response
+
+
+def test_bad_request(request):
+    raise BadRequest
+
+
+def test_permission_denied(request):
+    raise PermissionDenied
+
+
+def test_not_found(request):
+    raise Http404
