@@ -1,8 +1,16 @@
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Group
+
 from .models import User as iUser
-from social.models import Address
+from social.models import Address, Account
+
+
+class AccountInline(admin.TabularInline):
+    model = Account
+    fields = ('posts_count', 'followers', 'following')
+    extra = 0
 
 
 class AddressInline(admin.TabularInline):
@@ -20,31 +28,32 @@ class AddUserForm(UserCreationForm):
 
 
 class UserAdmin(BaseUserAdmin):
-    inlines = [AddressInline]
+    inlines = [AddressInline, AccountInline]
     actions = ['reset-passwords']
-    list_display = ('email', 'username')
+    list_display = ('username', 'email', 'photo_profile')
     readonly_fields = ('date_updated', 'date_joined')
     exclude = ('social_media_id', 'address_id')
+    fieldsets = ((None, {'fields': ('username', 'password')}),
+                 ('Personal Info', {'fields': ('first_name', 'last_name', 'email', 'photo_profile', 'phone_number')}),
+                 ('Permissions', {'fields': ('is_client', 'is_active', 'is_staff', 'is_superuser')}),
+                 ('Important Dates', {'fields': ('last_login', 'date_updated', 'date_joined')}),)
     add_fieldsets = (None, {'classes': ('wide',),
                             'fields': ('username', 'first_name', 'last_name', 'password1', 'password2', 'is_client',
                                        'is_staff', 'is_superuser')}),
 
     def get_address(self, obj):
         address = obj.address_id
-        return f'{address.address_id == ""} - {address.province} - {address.postal_code} - {address.address}'
 
-    get_address.short_description = 'Address'
+        return f'{address.province} - {address.postal_code} - {address.address}'
 
-    #
-    # def reset_passwords(self, request, queryset):
-    #     for user in queryset:
-    #         new_pass = User.objects.make_random_password()
-    #         user.set_password(new_pass)
-    #         user.save()
-    #         messages.success(request,
-    #                          f"Password reset successfully for {user.username}. New password: {new_pass}")
-    #
-    # reset_passwords.short_description = "Reset password for selected users"
+    def get_account(self, obj):
+        social = obj.account_id
+
+        return f'{social.name}'
+
+    get_address.short_description = 'Address User'
+    get_account.short_description = 'Social Media Account'
 
 
+admin.site.unregister(Group)
 admin.site.register(iUser, UserAdmin)

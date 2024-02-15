@@ -120,3 +120,7 @@ button:hover {
 .error {
   color: red;
 }
+
+.success {
+  color: #fff;
+}

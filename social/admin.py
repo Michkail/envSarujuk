@@ -1,24 +1,45 @@
 from django.contrib import admin
-from .models import SocialMedia, Platform, Account, AccountContent, CommentParent, Comment, Media
-from account.models import User
+from .models import Account, AccountContent, Address, CommentParent, Comment, Media, Statistic
 
 
-class PlatformInline(admin.TabularInline):
-    model = Platform
-    fields = ('name',)
+class AccountInline(admin.TabularInline):
+    model = Account
     extra = 0
-    exclude = ('platform_id', 'account_id')
 
 
-class SocialMediaAdmin(admin.ModelAdmin):
-    model = SocialMedia
-    exclude = ('social_media_id', 'platform_id')
+class AddressInline(admin.TabularInline):
+    model = Address
+    extra = 0
 
 
-class PlatformAdmin(admin.ModelAdmin):
-    model = Platform
-    exclude = ('platform_id', 'account_id')
+class CommentParentInline(admin.TabularInline):
+    model = CommentParent
+    extra = 0
 
 
-# admin.site.register(SocialMediaAdmin)
-admin.site.register(Platform, PlatformAdmin)
+class CommentChildInline(admin.TabularInline):
+    model = Comment
+    extra = 0
+
+
+class AccountAdmin(admin.ModelAdmin):
+    inline = [AddressInline]
+    list_display = ['user', 'platform', 'username', 'name']
+
+
+class AccountContentAdmin(admin.ModelAdmin):
+    inlines = [CommentParentInline, AddressInline]
+    list_display = ['account', 'content_code']
+    search_fields = ['content_code',]
+
+
+class CommentParentAdmin(admin.ModelAdmin):
+    inlines = [CommentChildInline]
+
+
+admin.site.register(Account, AccountAdmin)
+admin.site.register(AccountContent, AccountContentAdmin)
+admin.site.register(CommentParent, CommentParentAdmin)
+admin.site.register(Comment)
+admin.site.register(Media)
+admin.site.register(Statistic)

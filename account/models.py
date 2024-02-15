@@ -2,9 +2,8 @@ import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from django.utils import timezone
 
-from social.models import SocialMedia, Address
+from social.models import Address
 
 
 # Create your models here.
@@ -30,15 +29,15 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
-    social_media_id = models.ForeignKey(SocialMedia, on_delete=models.CASCADE, null=True, blank=True)
     address_id = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True,
                                    related_name="user_addresses")
+    photo_profile = models.ImageField(default='default.jpg', null=True, blank=True, upload_to='photo_profile/')
     is_client = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -51,3 +50,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
+
+    def save(self, *args, **kwargs):
+        if self.first_name and isinstance(self.first_name, str):
+            self.first_name = self.first_name.strip().title()
+
+        if self.last_name and isinstance(self.last_name, str):
+            self.last_name = self.last_name.strip().title()
+
+        super(User, self).save(*args, **kwargs)

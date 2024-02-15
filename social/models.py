@@ -1,12 +1,22 @@
 import uuid
 
 from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import ArrayField
+# from django.contrib.gis.db import models as geo
 from django.db import models
 from django.utils.text import gettext_lazy as _
 
 
 # Create your models here.
-class Province(models.TextChoices):
+class OptionsMedia(models.TextChoices):
+    X = "X"
+    FACEBOOK = "Facebook"
+    INSTAGRAM = "Instagram"
+    GOOGLE_MAPS = "Google Maps"
+    TIKTOK = "Tiktok"
+
+
+class OptionsProvince(models.TextChoices):
     NANGGROE_ACEH_DARUSSALAM = 'Nanggroe Aceh Darussalam'
     SUMATERA_UTARA = 'Sumatera Utara'
     SUMATERA_SELATAN = 'Sumatera Selatan'
@@ -48,75 +58,83 @@ class Province(models.TextChoices):
 
 
 class Address(models.Model):
-    user = models.ForeignKey('account.User', on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey('account.User', on_delete=models.CASCADE)
     address_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    province = models.CharField(max_length=100, choices=Province.choices, default=Province.JAKARTA, blank=True,
-                                null=True)
+    province = models.CharField(max_length=100, choices=OptionsProvince.choices, default=OptionsProvince.JAKARTA,
+                                blank=True, null=True)
+    account_content = models.ForeignKey('AccountContent', on_delete=models.CASCADE, blank=True, null=True)
     postal_code = models.CharField(max_length=5,
                                    validators=[RegexValidator('^[0-9]{5}$', _('Invalid postal code'))],
                                    blank=True, null=True)
     address = models.TextField(null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateField(auto_now=True)
-
-
-class SocialMedia(models.Model):
-    social_media_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    platform_id = models.ForeignKey('Platform', on_delete=models.CASCADE)
-    updated_at = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateField(auto_now=True)
-
-
-class Platform(models.Model):
-    platform_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    # location = geo.PointField()
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return ""
 
 
 class Account(models.Model):
+    user = models.ForeignKey('account.User', on_delete=models.CASCADE, blank=True, null=True)
     account_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    platform = models.CharField(max_length=20, choices=OptionsMedia.choices, default=OptionsMedia.X)
     username = models.CharField(max_length=255)
     email = models.EmailField()
-    password = models.CharField(max_length=255)
-    follower = models.PositiveIntegerField(null=True, blank=True)
+    password = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=20, null=True, blank=True)
+    followers = models.PositiveIntegerField(null=True, blank=True)
     following = models.PositiveIntegerField(null=True, blank=True)
+    likes_count = models.PositiveIntegerField(null=True, blank=True)
     posts_count = models.PositiveIntegerField(null=True, blank=True)
+    friends = models.PositiveIntegerField(null=True, blank=True)
+    reviews = models.PositiveIntegerField(null=True, blank=True)
+    tweets = models.PositiveIntegerField(null=True, blank=True)
     photo_profile = models.ImageField(upload_to='photos/', blank=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
 
+    def __str__(self):
+        return (f'{self.name if self.name is not None else "Name must be filled"} - '
+                f'username ({self.username if self.username is not None else "username is not filled"}) '
+                f' - Platform ({self.platform})')
+
 
 class AccountContent(models.Model):
     account_content_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    description = models.TextField()
-    media_id = models.ManyToManyField('Media', blank=True)
-    media_count = models.IntegerField()
-    comment_parent_id = models.ManyToManyField('CommentParent', blank=True)
-    comment_count = models.IntegerField()
-    address_id = models.ForeignKey('Address', on_delete=models.CASCADE, blank=True, null=True)
-    account_id = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
+    account = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
+    caption = models.TextField()
+    media = models.ManyToManyField('Media', blank=True)
+    content_code = models.CharField(max_length=40, blank=True, null=True, unique=True)
+    media_count = models.PositiveIntegerField(null=True, blank=True)
+    likes_count = models.PositiveIntegerField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.content_code
 
 
 class CommentParent(models.Model):
     comment_parent_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment_detail = models.TextField()
+    content_code = models.ForeignKey('AccountContent', on_delete=models.CASCADE, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
 
+    def __str__(self):
+        return self.comment_detail
+
 
 class Comment(models.Model):
-    comment_parent_id = models.ForeignKey('CommentParent', on_delete=models.CASCADE, null=True)
+    comment_parent = models.ForeignKey('CommentParent', on_delete=models.CASCADE, null=True)
     comment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     comment_detail = models.TextField()
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.comment_detail
 
 #
 # def media_upload_path(instance, filename):
@@ -127,9 +145,14 @@ class Comment(models.Model):
 
 class Media(models.Model):
     media_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    account = models.ForeignKey('Account', on_delete=models.CASCADE, blank=True, null=True)
     # user = models.ForeignKey(acc_user.User, on_delete=models.CASCADE, related_name='media', null=True, blank=True)
     # platform = models.ForeignKey('Platform', on_delete=models.CASCADE, related_name='media', null=True, blank=True)
     # media_location = models.FileField(upload_to=media_upload_path)
-    media_location = models.FileField(upload_to='media/social/')
+    media_path = models.FileField(upload_to='media/social/')
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateField(auto_now=True)
+
+
+class Statistic(models.Model):
+    dash_data_one = ArrayField(ArrayField(models.IntegerField()))
